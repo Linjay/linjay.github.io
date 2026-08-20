@@ -1,867 +1,177 @@
-<!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TI15 · DOTA2 国际邀请赛 2026 上海 — 实时看板</title>
-<style>
-:root{--surface:#fcfcfb;--plane:#f9f9f7;--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;
---grid:#e1e0d9;--border:rgba(11,11,11,.10);--s1:#2a78d6;--s2:#eb6834;
---good:#0ca30c;--warn:#fab219;--crit:#d03b3b;--seq:#2a78d6;--seqd:#184f95;color-scheme:light}
-@media(prefers-color-scheme:dark){:root{--surface:#1a1a19;--plane:#0d0d0d;--ink:#fff;--ink2:#c3c2b7;
---muted:#898781;--grid:#2c2c2a;--border:rgba(255,255,255,.10);--s1:#3987e5;--s2:#d95926;
---seq:#2a78d6;--seqd:#5598e7;color-scheme:dark}}
-*{box-sizing:border-box}html,body{margin:0;padding:0}
-body{background:var(--plane);color:var(--ink);font-size:15px;line-height:1.5;
-font-family:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;-webkit-text-size-adjust:100%}
-.mut{color:var(--muted);font-size:11.5px}.sec{color:var(--ink2);font-size:12px}
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 0 0}
-.hd{max-width:1180px;margin:0 auto;padding:0 14px}
-.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
-h1{font-size:23px;margin:5px 0 2px;line-height:1.22;font-weight:700}
-h1 .en{color:var(--ink2);font-weight:500;font-size:15px;display:block;margin-top:3px}
-.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin:12px 0 0;font-size:12.5px;color:var(--ink2)}
-.meta b{color:var(--ink);font-weight:600}
-.meta .upd b{color:var(--s1);font-variant-numeric:tabular-nums}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);
-border-top:1px solid var(--border);margin-top:16px}
-.kpi{background:var(--surface);padding:11px 12px}
-.kpi .v{font-size:19px;font-weight:700;letter-spacing:-.01em}
-.kpi .l{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.3}
-@media(max-width:640px){.kpis{grid-template-columns:repeat(2,1fr)}h1{font-size:19px}}
-.notice{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--warn);
-padding:9px 12px;margin:14px 0 0;font-size:12.5px;color:var(--ink2);border-radius:0 6px 6px 0}
-/* CSS-only tabs */
-.tin{position:absolute;opacity:0;pointer-events:none}
-nav.tabs{position:sticky;top:0;z-index:40;background:var(--surface);border-bottom:1px solid var(--border)}
-.tabs-in{max-width:1180px;margin:0 auto;padding:0 14px;display:flex;gap:2px}
-.tab{flex:1;text-align:center;border-bottom:2px solid transparent;color:var(--ink2);
-font-size:13.5px;font-weight:600;padding:12px 6px;cursor:pointer;min-height:44px;
-display:flex;flex-direction:column;justify-content:center;user-select:none}
-.tab .sub{font-size:10px;font-weight:500;color:var(--muted);letter-spacing:.04em}
-#t1:checked~nav .tab[for=t1],#t2:checked~nav .tab[for=t2],#t3:checked~nav .tab[for=t3]
-{color:var(--ink);border-bottom-color:var(--s1)}
-.wrap{max-width:1180px;margin:0 auto;padding:0 14px 40px}
-section{display:none}
-#t1:checked~.wrap #p1,#t2:checked~.wrap #p2,#t3:checked~.wrap #p3{display:block}
-@media(max-width:640px){nav.tabs{position:fixed;bottom:0;left:0;right:0;top:auto;
-border-top:1px solid var(--border);border-bottom:0;padding-bottom:env(safe-area-inset-bottom)}
-.tab{border-bottom:0;border-top:2px solid transparent}
-#t1:checked~nav .tab[for=t1],#t2:checked~nav .tab[for=t2],#t3:checked~nav .tab[for=t3]
-{border-bottom-color:transparent;border-top-color:var(--s1)}
-.wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}}
-h2{font-size:15px;margin:26px 0 4px;font-weight:700}
-h2 .en{color:var(--muted);font-weight:500;font-size:12px}
-h3{font-size:13px;margin:18px 0 8px;font-weight:700}
-.hint{font-size:12px;color:var(--muted);margin:0 0 12px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-th{text-align:left;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
-font-weight:600;padding:9px 10px;border-bottom:1px solid var(--grid);white-space:nowrap}
-td{padding:9px 10px;border-bottom:1px solid var(--grid);vertical-align:middle}
-tr:last-child td{border-bottom:0}
-.rk{font-variant-numeric:tabular-nums;color:var(--muted);width:26px;font-size:12px}
-.tname{font-weight:600;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.tname .cn{color:var(--ink2);font-weight:400;font-size:12px}
-.alias{font-size:10.5px;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:1px 5px}
-.rec{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
-.gm{font-variant-numeric:tabular-nums;color:var(--ink2);font-size:12.5px;white-space:nowrap}
-.bar{height:6px;border-radius:3px;background:var(--grid);overflow:hidden;min-width:54px;max-width:90px}
-.bar i{display:block;height:100%;border-radius:3px;background:var(--seq)}
-.badge{font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:20px;white-space:nowrap;
-display:inline-block;border:1px solid transparent}
-.b-adv{color:var(--good);border-color:color-mix(in srgb,var(--good) 40%,transparent);
-background:color-mix(in srgb,var(--good) 10%,transparent)}
-.b-eli{color:var(--crit);border-color:color-mix(in srgb,var(--crit) 40%,transparent);
-background:color-mix(in srgb,var(--crit) 10%,transparent)}
-.b-mid{color:var(--ink2);border-color:var(--border)}
-@media(max-width:640px){.hide-s{display:none}td,th{padding:8px 7px}}
-.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:9px}
-.m{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 12px}
-.m .top{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-bottom:7px}
-.m .row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 0;font-size:13.5px}
-.m .row.win{font-weight:700}.m .row.lose{color:var(--muted)}
-.m .sc{font-variant-numeric:tabular-nums;font-weight:700;font-size:15px}
-.m.sched{border-style:dashed}.m.sched .sc{color:var(--muted);font-weight:500;font-size:12px}
-/* 主赛事双败树：每轮一列，横向可滚动；列内 space-around 让后一轮的框落在前一轮两框之间 */
-.bk{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:5px}
-.bk-in{display:flex;gap:9px;min-width:min-content;align-items:stretch}
-.bk-col{flex:1 0 198px;min-width:198px;display:flex;flex-direction:column}
-/* 只有对阵框参与纵向分配，标题固定在列顶；这样后一轮的框自然落在前一轮两框之间 */
-.bk-b{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:8px}
-.bk-h{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
-font-weight:700;padding-bottom:6px;flex:0 0 auto}
-.bk-h em{font-style:normal;font-weight:500;text-transform:none;letter-spacing:0}
-.bk-m{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 10px}
-.bk-m.sched{border-style:dashed}
-.bk-t{display:flex;justify-content:space-between;gap:6px;font-size:10px;color:var(--muted);margin-bottom:5px}
-.bk-r{display:flex;align-items:center;justify-content:space-between;gap:7px;padding:2px 0;font-size:13px}
-.bk-r .who{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bk-r .who.src{color:var(--muted);font-size:11px}
-.bk-r .sc{font-variant-numeric:tabular-nums;font-weight:700;flex:0 0 auto}
-.bk-r.win{font-weight:700}.bk-r.lose{color:var(--muted)}
-.bk-r.tbd .sc,.bk-m.sched .sc{color:var(--muted);font-weight:500;font-size:12px}
-.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:11px}
-.tc{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:13px 14px}
-.th{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:3px}
-.nm{font-weight:700;font-size:15px}
-.tc .sub{font-size:11.5px;color:var(--muted);margin:2px 0 10px}
-.rec2{font-variant-numeric:tabular-nums;font-weight:700;font-size:15px;white-space:nowrap}
-.pl{display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--grid);font-size:13px}
-.pl .pos{font-variant-numeric:tabular-nums;font-size:10px;color:var(--muted);width:13px;flex:0 0 13px;font-weight:700}
-.pl .fg{font-size:15px;flex:0 0 auto;line-height:1}
-.pl .nk{font-weight:600;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pl .cy{font-size:10.5px;color:var(--muted);flex:0 0 auto}
-.pl.foreign .cy{color:var(--s2);font-weight:600}
-.ftr{margin-top:9px;padding-top:8px;border-top:1px solid var(--grid);font-size:10.5px;color:var(--muted)}
-.chart{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:15px 14px}
-.nrow{display:grid;grid-template-columns:19px minmax(96px,150px) 1fr 26px;align-items:center;gap:8px;padding:3px 0}
-.nrow .fg{font-size:16px;line-height:1}
-.nrow .nmc{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nrow .nmc em{font-style:normal;color:var(--muted);font-size:10.5px}
-.nrow .track{height:17px;display:flex;align-items:center}
-.nrow .fill{height:14px;border-radius:0 4px 4px 0;background:var(--seq);
-box-shadow:0 0 0 2px var(--surface);min-width:3px}
-.nrow .val{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--ink2);text-align:right;font-weight:600}
-.nrow:hover .fill{background:var(--seqd)}
-@media(max-width:640px){.bk-col{flex:1 0 168px;min-width:168px}.bk-r{font-size:12.5px}}
-@media(max-width:400px){.nrow{grid-template-columns:17px minmax(74px,96px) 1fr 24px;gap:6px}
-.nrow .nmc em{display:none}}
-.callout{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px;margin:12px 0 0}
-.co{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 14px}
-.co .n{font-size:25px;font-weight:700;letter-spacing:-.02em}
-.co .t{font-size:12px;color:var(--ink2);margin-top:3px;line-height:1.4}
-.co.acc{border-left:3px solid var(--s2)}
-.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2);margin:10px 0 0}
-.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-details{margin-top:12px}summary{cursor:pointer;font-size:12.5px;color:var(--ink2);padding:6px 0;min-height:34px}
-footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--border);
-font-size:11.5px;color:var(--muted);line-height:1.7}
-</style></head><body>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="LINJAY 独立 HTML 项目入口">
+  <title>LINJAY · Web Portal</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080b13;
+      --surface: rgba(20, 26, 43, 0.82);
+      --line: rgba(255, 255, 255, 0.1);
+      --text: #f4f7ff;
+      --muted: #9ba8c6;
+      --accent: #8b5cf6;
+      --accent-2: #22d3ee;
+    }
 
-<input class="tin" type="radio" name="tb" id="t1" checked>
-<input class="tin" type="radio" name="tb" id="t2">
-<input class="tin" type="radio" name="tb" id="t3">
+    * { box-sizing: border-box; }
 
-<header><div class="hd">
-<div class="eyebrow">The International 2026 · Shanghai</div>
-<h1>第十五届 DOTA2 国际邀请赛<span class="en">The International 2026 (TI15)</span></h1>
-<div class="meta"><span>📅 <b>2026-08-13 — 08-23</b></span><span>📍 <b>中国 · 上海 · 东方体育中心</b></span>
-<span>💰 总奖金 <b>$2,995,369</b> · 冠军 <b>$1,235,379</b></span>
-<span class="upd">🕒 数据更新 <b>08-20 15:15</b></span></div>
-</div><div class="kpis">
-<div class="kpi"><div class="v">16</div><div class="l">参赛战队<br>Teams</div></div>
-<div class="kpi"><div class="v">80</div><div class="l">选手<br>Players</div></div>
-<div class="kpi"><div class="v">27</div><div class="l">选手国籍数<br>Nationalities</div></div>
-<div class="kpi"><div class="v">主赛事 Day 1</div><div class="l">当前阶段<br>Current stage</div></div>
-</div></header>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(139, 92, 246, 0.2), transparent 34rem),
+        radial-gradient(circle at 85% 20%, rgba(34, 211, 238, 0.13), transparent 30rem),
+        var(--bg);
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-<nav class="tabs"><div class="tabs-in">
-<label class="tab" for="t1">赛况<span class="sub">Standings</span></label>
-<label class="tab" for="t2">战队<span class="sub">Teams</span></label>
-<label class="tab" for="t3">国籍<span class="sub">Nationalities</span></label>
-</div></nav>
+    main {
+      width: min(1080px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 88px 0 64px;
+    }
 
-<div class="wrap">
-<div class="notice">⚠️ 8/18—8/19 休赛无比赛。主赛事 8/20 开打：胜者组 1/4 决赛首场 Team Spirit 2-0 横扫 Iron Wing，Spirit 晋级胜者组半决赛、对手为 TEAM VISION 与 BoomBoys 之间的胜者；Iron Wing 落入败者组。第二场 TEAM VISION vs BoomBoys 正在进行（大比分 0-0，第一局比赛中）；16:00 Liquid vs Yandex、19:00 Nigma vs Falcons 待开赛 · Aug 18–19 were rest days with no matches. The Main Event opened on Aug 20: in the first upper-bracket quarterfinal Team Spirit swept Iron Wing 2-0 and moved on to the upper semifinal against the winner of TEAM VISION vs BoomBoys, while Iron Wing dropped to the lower bracket. The second quarterfinal, TEAM VISION vs BoomBoys, is live (series 0-0, game 1 in progress); Liquid vs Yandex (16:00) and Nigma vs Falcons (19:00) have yet to start</div>
+    .eyebrow {
+      margin: 0 0 18px;
+      color: var(--accent-2);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
 
-<section id="p1">
-<h2>瑞士轮最终积分榜 <span class="en">Final Swiss Stage Standings</span></h2>
-<p class="hint">下表为瑞士轮最终名次。前 3 名直通八强，末 3 名出局；第 4–13 名于 8/16 打单场 BO3 生死战，5 名胜者补齐八强。状态栏已反映 8/16 结果与主赛事进程（主赛事为双败，输满两场才出局）。 Final Swiss standings. Top 3 advanced directly, bottom 3 were out; seeds 4–13 played a single Bo3 on Aug 16 for the last five playoff slots. The status column reflects the Aug 16 outcomes and Main Event progress (the Main Event is double elimination — two series losses to be knocked out).</p>
-<div class="card"><table><thead><tr><th>#</th><th>战队 Team</th><th>战绩</th>
-<th class="hide-s">小分 Games</th><th class="hide-s">胜率</th><th>状态</th></tr></thead>
-<tbody><tr><td class="rk">1</td>
-<td><div class="tname">TEAM VISION<span class="cn">视野战队</span><span class="alias">PARIVISION</span></div></td>
-<td class="rec">4–0</td>
-<td class="gm hide-s">8–2</td>
-<td class="hide-s"><div class="bar"><i style="width:80%"></i></div></td>
-<td><span class="badge b-adv">● 直通八强 Advanced</span></td></tr>
-<tr><td class="rk">2</td>
-<td><div class="tname">Nigma Galaxy<span class="cn">谜团银河</span></div></td>
-<td class="rec">4–1</td>
-<td class="gm hide-s">8–2</td>
-<td class="hide-s"><div class="bar"><i style="width:80%"></i></div></td>
-<td><span class="badge b-adv">● 直通八强 Advanced</span></td></tr>
-<tr><td class="rk">3</td>
-<td><div class="tname">Team Liquid<span class="cn">液体</span></div></td>
-<td class="rec">4–1</td>
-<td class="gm hide-s">9–5</td>
-<td class="hide-s"><div class="bar"><i style="width:64%"></i></div></td>
-<td><span class="badge b-adv">● 直通八强 Advanced</span></td></tr>
-<tr><td class="rk">4</td>
-<td><div class="tname">Aurora Gaming<span class="cn">极光</span></div></td>
-<td class="rec">3–2</td>
-<td class="gm hide-s">7–5</td>
-<td class="hide-s"><div class="bar"><i style="width:58%"></i></div></td>
-<td><span class="badge b-eli">● 出局 Eliminated</span></td></tr>
-<tr><td class="rk">5</td>
-<td><div class="tname">Iron Wing<span class="cn">铁翼</span><span class="alias">1win（前 Tundra）</span></div></td>
-<td class="rec">3–2</td>
-<td class="gm hide-s">8–6</td>
-<td class="hide-s"><div class="bar"><i style="width:57%"></i></div></td>
-<td><span class="badge b-adv">● 败者组 Lower Bracket</span></td></tr>
-<tr><td class="rk">6</td>
-<td><div class="tname">Team Spirit<span class="cn">战队精神</span></div></td>
-<td class="rec">3–2</td>
-<td class="gm hide-s">6–5</td>
-<td class="hide-s"><div class="bar"><i style="width:55%"></i></div></td>
-<td><span class="badge b-adv">● 胜者组半决赛 UB Semifinal</span></td></tr>
-<tr><td class="rk">7</td>
-<td><div class="tname">LGD Gaming<span class="cn">LGD</span><span class="alias">前 HEROIC 阵容</span></div></td>
-<td class="rec">3–2</td>
-<td class="gm hide-s">7–6</td>
-<td class="hide-s"><div class="bar"><i style="width:54%"></i></div></td>
-<td><span class="badge b-eli">● 出局 Eliminated</span></td></tr>
-<tr><td class="rk">8</td>
-<td><div class="tname">Team Falcons<span class="cn">猎鹰</span></div></td>
-<td class="rec">3–2</td>
-<td class="gm hide-s">8–7</td>
-<td class="hide-s"><div class="bar"><i style="width:53%"></i></div></td>
-<td><span class="badge b-adv">● 晋级八强 Advanced</span></td></tr>
-<tr><td class="rk">9</td>
-<td><div class="tname">Team Resilience<span class="cn">坚韧</span></div></td>
-<td class="rec">2–3</td>
-<td class="gm hide-s">7–6</td>
-<td class="hide-s"><div class="bar"><i style="width:54%"></i></div></td>
-<td><span class="badge b-eli">● 出局 Eliminated</span></td></tr>
-<tr><td class="rk">10</td>
-<td><div class="tname">Team Yandex<span class="cn">Yandex</span></div></td>
-<td class="rec">2–3</td>
-<td class="gm hide-s">7–7</td>
-<td class="hide-s"><div class="bar"><i style="width:50%"></i></div></td>
-<td><span class="badge b-adv">● 晋级八强 Advanced</span></td></tr>
-<tr><td class="rk">11</td>
-<td><div class="tname">GamerLegion<span class="cn">GL</span></div></td>
-<td class="rec">2–3</td>
-<td class="gm hide-s">6–6</td>
-<td class="hide-s"><div class="bar"><i style="width:50%"></i></div></td>
-<td><span class="badge b-eli">● 出局 Eliminated</span></td></tr>
-<tr><td class="rk">12</td>
-<td><div class="tname">BoomBoys<span class="cn">繁荣男孩</span><span class="alias">BetBoom Team</span></div></td>
-<td class="rec">2–3</td>
-<td class="gm hide-s">5–7</td>
-<td class="hide-s"><div class="bar"><i style="width:42%"></i></div></td>
-<td><span class="badge b-adv">● 晋级八强 Advanced</span></td></tr>
-<tr><td class="rk">13</td>
-<td><div class="tname">Vici Gaming<span class="cn">VG</span></div></td>
-<td class="rec">2–3</td>
-<td class="gm hide-s">4–8</td>
-<td class="hide-s"><div class="bar"><i style="width:33%"></i></div></td>
-<td><span class="badge b-eli">● 出局 Eliminated</span></td></tr>
-<tr><td class="rk">14</td>
-<td><div class="tname">Xtreme Gaming<span class="cn">XG</span></div></td>
-<td class="rec">1–4</td>
-<td class="gm hide-s">3–8</td>
-<td class="hide-s"><div class="bar"><i style="width:27%"></i></div></td>
-<td><span class="badge b-eli">● 出局 Eliminated</span></td></tr>
-<tr><td class="rk">15</td>
-<td><div class="tname">OG<span class="cn">OG</span></div></td>
-<td class="rec">1–4</td>
-<td class="gm hide-s">2–9</td>
-<td class="hide-s"><div class="bar"><i style="width:18%"></i></div></td>
-<td><span class="badge b-eli">● 出局 Eliminated</span></td></tr>
-<tr><td class="rk">16</td>
-<td><div class="tname">HULIGANI<span class="cn">流氓</span><span class="alias">L1ga Team</span></div></td>
-<td class="rec">0–4</td>
-<td class="gm hide-s">2–8</td>
-<td class="hide-s"><div class="bar"><i style="width:20%"></i></div></td>
-<td><span class="badge b-eli">● 出局 Eliminated</span></td></tr></tbody></table></div>
-<div class="legend"><span><i style="background:var(--good)"></i>已晋级八强 Playoff-bound</span>
-<span><i style="background:var(--crit)"></i>已淘汰 Eliminated</span>
-<span><i style="background:var(--seq)"></i>小场胜率 Game win rate</span></div>
-<h2>赛程 <span class="en">Format &amp; Schedule</span></h2>
-<div class="card"><table><tbody><tr><td style="white-space:nowrap"><b>8/13 — 8/15</b></td>
-<td><b>瑞士轮小组赛</b> <span class="mut">Swiss Stage</span><br><span class="sec">16 队 BO3；前 3 名（VISION / Nigma / Liquid）直通八强，末 3 名（XG / OG / HULIGANI）出局</span></td>
-<td style="text-align:right"><span class="badge b-mid">已结束 Done</span></td></tr>
-<tr><td style="white-space:nowrap"><b>8/16</b></td>
-<td><b>淘汰轮 · 生死战</b> <span class="mut">Elimination Round</span><br><span class="sec">5 场单场 BO3 全部结束；Falcons / BoomBoys / Spirit / Iron Wing / Yandex 五队补齐八强</span></td>
-<td style="text-align:right"><span class="badge b-mid">已结束 Done</span></td></tr>
-<tr><td style="white-space:nowrap"><b>8/17 — 8/19</b></td>
-<td><b>休赛日</b> <span class="mut">Rest Days</span><br><span class="sec">无比赛；主赛事双败淘汰对阵表已于 8/17 公布</span></td>
-<td style="text-align:right"><span class="badge b-mid">已结束 Done</span></td></tr>
-<tr><td style="white-space:nowrap"><b>8/20 — 8/23</b></td>
-<td><b>主赛事 · 双败淘汰</b> <span class="mut">Main Event</span><br><span class="sec">上海东方体育中心；8 队 BO3，总决赛 BO5。8/20 胜者组 1/4 决赛：Spirit 2-0 Iron Wing 已结束；VISION vs BoomBoys(13:00) 进行中；Liquid vs Yandex(16:00)、Nigma vs Falcons(19:00) 待开赛</span></td>
-<td style="text-align:right"><span class="badge b-adv">进行中 Live</span></td></tr></tbody></table></div>
-<h2>主赛事对阵树 <span class="en">Main Event Bracket</span></h2>
-<p class="hint">8/20 四场 1/4 决赛为官方已公布对阵，首场 Team Spirit 2-0 Iron Wing 已结束，Spirit 就位胜者组半决赛、对手为 VISION / BoomBoys 之间的胜者。8/21 起各轮的场次数与日期已确定，但败者组的具体配对官方仍未公布 —— 故未定的位置只标注来源，不作推定。 The four Aug 20 quarterfinals are the official published matchups. The first is done — Team Spirit beat Iron Wing 2-0 and is locked into an upper semifinal against the winner of VISION vs BoomBoys. The number of series and the dates for later rounds are fixed, but the lower-bracket pairings are still unpublished, so each open slot shows only where its team will come from.</p>
-<h3>胜者组 <span class="mut">Upper Bracket</span></h3><div class="bk"><div class="bk-in"><div class="bk-col"><div class="bk-h">1/4 决赛 <em>Quarterfinals</em></div><div class="bk-b"><div class="bk-m">
-<div class="bk-t"><span>已结束 Final</span><span>BO3</span></div>
-<div class="bk-r lose"><span class="who">Iron Wing</span><span class="sc">0</span></div><div class="bk-r win"><span class="who">Team Spirit</span><span class="sc">2</span></div></div><div class="bk-m sched">
-<div class="bk-t"><span>🔴 进行中 13:00</span><span>BO3</span></div>
-<div class="bk-r "><span class="who">TEAM VISION</span><span class="sc">–</span></div><div class="bk-r "><span class="who">BoomBoys</span><span class="sc">–</span></div></div><div class="bk-m sched">
-<div class="bk-t"><span>8/20 16:00 待开始</span><span>BO3</span></div>
-<div class="bk-r "><span class="who">Team Liquid</span><span class="sc">–</span></div><div class="bk-r "><span class="who">Team Yandex</span><span class="sc">–</span></div></div><div class="bk-m sched">
-<div class="bk-t"><span>8/20 19:00 待开始</span><span>BO3</span></div>
-<div class="bk-r "><span class="who">Nigma Galaxy</span><span class="sc">–</span></div><div class="bk-r "><span class="who">Team Falcons</span><span class="sc">–</span></div></div></div></div><div class="bk-col"><div class="bk-h">半决赛 <em>Semifinals</em></div><div class="bk-b"><div class="bk-m sched">
-<div class="bk-t"><span>8/21 待开始</span><span>BO3</span></div>
-<div class="bk-r "><span class="who">Team Spirit</span><span class="sc">–</span></div><div class="bk-r tbd"><span class="who src">胜者组 1/4 决赛 胜者</span><span class="sc">–</span></div></div><div class="bk-m sched">
-<div class="bk-t"><span>8/21 待开始</span><span>BO3</span></div>
-<div class="bk-r tbd"><span class="who src">胜者组 1/4 决赛 胜者</span><span class="sc">–</span></div><div class="bk-r tbd"><span class="who src">胜者组 1/4 决赛 胜者</span><span class="sc">–</span></div></div></div></div><div class="bk-col"><div class="bk-h">胜者组决赛 <em>Upper Final</em></div><div class="bk-b"><div class="bk-m sched">
-<div class="bk-t"><span>8/22 待开始</span><span>BO3</span></div>
-<div class="bk-r tbd"><span class="who src">胜者组半决赛 胜者</span><span class="sc">–</span></div><div class="bk-r tbd"><span class="who src">胜者组半决赛 胜者</span><span class="sc">–</span></div></div></div></div></div></div>
-<h3>败者组 <span class="mut">Lower Bracket</span></h3><div class="bk"><div class="bk-in"><div class="bk-col"><div class="bk-h">首轮 <em>Round 1</em></div><div class="bk-b"><div class="bk-m sched">
-<div class="bk-t"><span>8/21 待开始</span><span>BO3</span></div>
-<div class="bk-r tbd"><span class="who src">胜者组 1/4 决赛 负者</span><span class="sc">–</span></div><div class="bk-r tbd"><span class="who src">胜者组 1/4 决赛 负者</span><span class="sc">–</span></div></div><div class="bk-m sched">
-<div class="bk-t"><span>8/21 待开始</span><span>BO3</span></div>
-<div class="bk-r tbd"><span class="who src">胜者组 1/4 决赛 负者</span><span class="sc">–</span></div><div class="bk-r tbd"><span class="who src">胜者组 1/4 决赛 负者</span><span class="sc">–</span></div></div></div></div><div class="bk-col"><div class="bk-h">1/4 决赛 <em>Quarterfinals</em></div><div class="bk-b"><div class="bk-m sched">
-<div class="bk-t"><span>8/22 待开始</span><span>BO3</span></div>
-<div class="bk-r tbd"><span class="who src">败者组首轮 胜者</span><span class="sc">–</span></div><div class="bk-r tbd"><span class="who src">胜者组半决赛 负者</span><span class="sc">–</span></div></div><div class="bk-m sched">
-<div class="bk-t"><span>8/22 待开始</span><span>BO3</span></div>
-<div class="bk-r tbd"><span class="who src">败者组首轮 胜者</span><span class="sc">–</span></div><div class="bk-r tbd"><span class="who src">胜者组半决赛 负者</span><span class="sc">–</span></div></div></div></div><div class="bk-col"><div class="bk-h">半决赛 <em>Semifinal</em></div><div class="bk-b"><div class="bk-m sched">
-<div class="bk-t"><span>8/22 待开始</span><span>BO3</span></div>
-<div class="bk-r tbd"><span class="who src">败者组 1/4 决赛 胜者</span><span class="sc">–</span></div><div class="bk-r tbd"><span class="who src">败者组 1/4 决赛 胜者</span><span class="sc">–</span></div></div></div></div><div class="bk-col"><div class="bk-h">败者组决赛 <em>Lower Final</em></div><div class="bk-b"><div class="bk-m sched">
-<div class="bk-t"><span>8/23 待开始</span><span>BO3</span></div>
-<div class="bk-r tbd"><span class="who src">败者组半决赛 胜者</span><span class="sc">–</span></div><div class="bk-r tbd"><span class="who src">胜者组决赛 负者</span><span class="sc">–</span></div></div></div></div></div></div>
-<h3>总决赛 <span class="mut">Grand Final</span></h3><div class="bk"><div class="bk-in"><div class="bk-col"><div class="bk-h">总决赛 <em>Grand Final</em></div><div class="bk-b"><div class="bk-m sched">
-<div class="bk-t"><span>8/23 待开始</span><span>BO5</span></div>
-<div class="bk-r tbd"><span class="who src">胜者组决赛 胜者</span><span class="sc">–</span></div><div class="bk-r tbd"><span class="who src">败者组决赛 胜者</span><span class="sc">–</span></div></div></div></div></div></div>
+    h1 {
+      max-width: 760px;
+      margin: 0;
+      font-size: clamp(2.65rem, 8vw, 5.8rem);
+      line-height: 0.96;
+      letter-spacing: -0.055em;
+    }
 
-<h2>对阵结果 <span class="en">Match Results</span></h2>
-<p class="hint">时间为北京时间 (UTC+8)。 All times Beijing (UTC+8).</p>
-<h3>8月 13 日 <span class="mut">Aug 13</span></h3>
-<div class="mgrid"><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Falcons</span><span class="sc">2</span></div>
-<div class="row lose"><span>LGD Gaming</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Iron Wing</span><span class="sc">2</span></div>
-<div class="row lose"><span>Nigma Galaxy</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>BoomBoys</span><span class="sc">2</span></div>
-<div class="row lose"><span>OG</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>TEAM VISION</span><span class="sc">2</span></div>
-<div class="row lose"><span>Team Resilience</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Aurora Gaming</span><span class="sc">2</span></div>
-<div class="row lose"><span>GamerLegion</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Liquid</span><span class="sc">2</span></div>
-<div class="row lose"><span>Vici Gaming</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Spirit</span><span class="sc">2</span></div>
-<div class="row lose"><span>Xtreme Gaming</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Yandex</span><span class="sc">2</span></div>
-<div class="row lose"><span>HULIGANI</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Nigma Galaxy</span><span class="sc">2</span></div>
-<div class="row lose"><span>OG</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>LGD Gaming</span><span class="sc">2</span></div>
-<div class="row lose"><span>Team Resilience</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>TEAM VISION</span><span class="sc">2</span></div>
-<div class="row lose"><span>Team Falcons</span><span class="sc">1</span></div></div></div>
-<h3>8月 14 日 <span class="mut">Aug 14</span></h3>
-<div class="mgrid"><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>BoomBoys</span><span class="sc">2</span></div>
-<div class="row lose"><span>Iron Wing</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Vici Gaming</span><span class="sc">2</span></div>
-<div class="row lose"><span>HULIGANI</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>GamerLegion</span><span class="sc">2</span></div>
-<div class="row lose"><span>Xtreme Gaming</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Liquid</span><span class="sc">2</span></div>
-<div class="row lose"><span>Team Yandex</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Spirit</span><span class="sc">2</span></div>
-<div class="row lose"><span>Aurora Gaming</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Nigma Galaxy</span><span class="sc">2</span></div>
-<div class="row lose"><span>LGD Gaming</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>TEAM VISION</span><span class="sc">2</span></div>
-<div class="row lose"><span>BoomBoys</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Iron Wing</span><span class="sc">2</span></div>
-<div class="row lose"><span>Team Falcons</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Resilience</span><span class="sc">2</span></div>
-<div class="row lose"><span>OG</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Vici Gaming</span><span class="sc">2</span></div>
-<div class="row lose"><span>GamerLegion</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Spirit</span><span class="sc">2</span></div>
-<div class="row lose"><span>Team Liquid</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Xtreme Gaming</span><span class="sc">2</span></div>
-<div class="row lose"><span>HULIGANI</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Aurora Gaming</span><span class="sc">2</span></div>
-<div class="row lose"><span>Team Yandex</span><span class="sc">1</span></div></div></div>
-<h3>8月 15 日 <span class="mut">Aug 15</span></h3>
-<div class="mgrid"><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Yandex</span><span class="sc">2</span></div>
-<div class="row lose"><span>Team Resilience</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Falcons</span><span class="sc">2</span></div>
-<div class="row lose"><span>GamerLegion</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>OG</span><span class="sc">2</span></div>
-<div class="row lose"><span>HULIGANI</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>LGD Gaming</span><span class="sc">2</span></div>
-<div class="row lose"><span>Xtreme Gaming</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Liquid</span><span class="sc">2</span></div>
-<div class="row lose"><span>Iron Wing</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Nigma Galaxy</span><span class="sc">2</span></div>
-<div class="row lose"><span>Vici Gaming</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Aurora Gaming</span><span class="sc">2</span></div>
-<div class="row lose"><span>BoomBoys</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>TEAM VISION</span><span class="sc">2</span></div>
-<div class="row lose"><span>Team Spirit</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>GamerLegion</span><span class="sc">2</span></div>
-<div class="row lose"><span>OG</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Resilience</span><span class="sc">2</span></div>
-<div class="row lose"><span>Xtreme Gaming</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>LGD Gaming</span><span class="sc">2</span></div>
-<div class="row lose"><span>Vici Gaming</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Falcons</span><span class="sc">2</span></div>
-<div class="row lose"><span>BoomBoys</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Iron Wing</span><span class="sc">2</span></div>
-<div class="row lose"><span>Team Yandex</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Liquid</span><span class="sc">2</span></div>
-<div class="row lose"><span>Aurora Gaming</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Nigma Galaxy</span><span class="sc">2</span></div>
-<div class="row lose"><span>Team Spirit</span><span class="sc">0</span></div></div></div>
-<h3>8月 16 日 <span class="mut">Aug 16</span></h3>
-<div class="mgrid"><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Falcons</span><span class="sc">2</span></div>
-<div class="row lose"><span>Vici Gaming</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row lose"><span>Aurora Gaming</span><span class="sc">0</span></div>
-<div class="row win"><span>BoomBoys</span><span class="sc">2</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Team Spirit</span><span class="sc">2</span></div>
-<div class="row lose"><span>Team Resilience</span><span class="sc">1</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row win"><span>Iron Wing</span><span class="sc">2</span></div>
-<div class="row lose"><span>GamerLegion</span><span class="sc">0</span></div></div><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row lose"><span>LGD Gaming</span><span class="sc">1</span></div>
-<div class="row win"><span>Team Yandex</span><span class="sc">2</span></div></div></div>
-<h3>8月 20 日 <span class="mut">Aug 20</span></h3>
-<div class="mgrid"><div class="m ">
-<div class="top"><span>已结束 Final</span><span>BO3</span></div>
-<div class="row lose"><span>Iron Wing</span><span class="sc">0</span></div>
-<div class="row win"><span>Team Spirit</span><span class="sc">2</span></div></div><div class="m sched">
-<div class="top"><span>🔴 进行中 Live · 13:00</span><span>BO3</span></div>
-<div class="row "><span>TEAM VISION</span><span class="sc">–</span></div>
-<div class="row "><span>BoomBoys</span><span class="sc">–</span></div></div><div class="m sched">
-<div class="top"><span>待开始 16:00</span><span>BO3</span></div>
-<div class="row "><span>Team Liquid</span><span class="sc">–</span></div>
-<div class="row "><span>Team Yandex</span><span class="sc">–</span></div></div><div class="m sched">
-<div class="top"><span>待开始 19:00</span><span>BO3</span></div>
-<div class="row "><span>Nigma Galaxy</span><span class="sc">–</span></div>
-<div class="row "><span>Team Falcons</span><span class="sc">–</span></div></div></div>
-</section>
+    .intro {
+      max-width: 620px;
+      margin: 28px 0 56px;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.18rem);
+      line-height: 1.75;
+    }
 
-<section id="p2">
-<h2>16 支战队 <span class="en">The 16 Teams</span></h2>
-<p class="hint">橙色国籍标记 = 该选手国籍与战队注册地不同。 Orange = player's nationality differs from the org's home country.</p>
-<div class="tgrid"><div class="tc"><div class="th"><div>
-<div class="nm">🇷🇸 TEAM VISION</div>
-<div class="sub">视野战队 · 东欧 Eastern Europe · 欧洲预选 · 原名 PARIVISION</div>
-</div><div class="rec2">4–0</div></div><div class="pl foreign"><span class="pos">1</span>
-<span class="fg">🇷🇺</span><span class="nk">Satanic</span><span class="cy">俄罗斯</span></div><div class="pl foreign"><span class="pos">2</span>
-<span class="fg">🇺🇦</span><span class="nk">No[o]ne-</span><span class="cy">乌克兰</span></div><div class="pl foreign"><span class="pos">3</span>
-<span class="fg">🇷🇺</span><span class="nk">Noticed</span><span class="cy">俄罗斯</span></div><div class="pl foreign"><span class="pos">4</span>
-<span class="fg">🇷🇺</span><span class="nk">9Class</span><span class="cy">俄罗斯</span></div><div class="pl foreign"><span class="pos">5</span>
-<span class="fg">🇷🇺</span><span class="nk">Dukalis</span><span class="cy">俄罗斯</span></div>
-<div class="ftr">2 个国籍 · 8–2 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇦🇪 Nigma Galaxy</div>
-<div class="sub">谜团银河 · 西欧 Western Europe · 欧洲预选</div>
-</div><div class="rec2">4–1</div></div><div class="pl foreign"><span class="pos">1</span>
-<span class="fg">🇵🇰</span><span class="nk">SumaiL</span><span class="cy">巴基斯坦</span></div><div class="pl foreign"><span class="pos">2</span>
-<span class="fg">🇺🇦</span><span class="nk">lorenof</span><span class="cy">乌克兰</span></div><div class="pl foreign"><span class="pos">3</span>
-<span class="fg">🇧🇪</span><span class="nk">Davai Lama</span><span class="cy">比利时</span></div><div class="pl foreign"><span class="pos">4</span>
-<span class="fg">🇱🇧</span><span class="nk">OmaR</span><span class="cy">黎巴嫩</span></div><div class="pl foreign"><span class="pos">5</span>
-<span class="fg">🇱🇧</span><span class="nk">GH</span><span class="cy">黎巴嫩</span></div>
-<div class="ftr">4 个国籍 · 8–2 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇳🇱 Team Liquid</div>
-<div class="sub">液体 · 西欧 Western Europe · 直邀</div>
-</div><div class="rec2">4–1</div></div><div class="pl foreign"><span class="pos">1</span>
-<span class="fg">🇸🇪</span><span class="nk">m1CKe</span><span class="cy">瑞典</span></div><div class="pl foreign"><span class="pos">2</span>
-<span class="fg">🇵🇱</span><span class="nk">Nisha</span><span class="cy">波兰</span></div><div class="pl foreign"><span class="pos">3</span>
-<span class="fg">🇩🇰</span><span class="nk">Ace</span><span class="cy">丹麦</span></div><div class="pl foreign"><span class="pos">4</span>
-<span class="fg">🇸🇪</span><span class="nk">Boxi</span><span class="cy">瑞典</span></div><div class="pl foreign"><span class="pos">5</span>
-<span class="fg">🇩🇪</span><span class="nk">tOfu</span><span class="cy">德国</span></div>
-<div class="ftr">4 个国籍 · 9–5 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇷🇸 Aurora Gaming</div>
-<div class="sub">极光 · 东欧 Eastern Europe · 直邀</div>
-</div><div class="rec2">3–2</div></div><div class="pl foreign"><span class="pos">1</span>
-<span class="fg">🇷🇺</span><span class="nk">Nightfall</span><span class="cy">俄罗斯</span></div><div class="pl foreign"><span class="pos">2</span>
-<span class="fg">🇮🇩</span><span class="nk">Mikoto</span><span class="cy">印度尼西亚</span></div><div class="pl foreign"><span class="pos">3</span>
-<span class="fg">🇲🇾</span><span class="nk">Ws</span><span class="cy">马来西亚</span></div><div class="pl foreign"><span class="pos">4</span>
-<span class="fg">🇺🇦</span><span class="nk">Mira</span><span class="cy">乌克兰</span></div><div class="pl foreign"><span class="pos">5</span>
-<span class="fg">🇺🇦</span><span class="nk">kaori</span><span class="cy">乌克兰</span></div>
-<div class="ftr">4 个国籍 · 7–5 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇷🇺 Iron Wing</div>
-<div class="sub">铁翼 · 欧洲 Europe · 直邀 · 原名 1win（前 Tundra）</div>
-</div><div class="rec2">3–2</div></div><div class="pl"><span class="pos">1</span>
-<span class="fg">🇷🇺</span><span class="nk">Pure</span><span class="cy">俄罗斯</span></div><div class="pl foreign"><span class="pos">2</span>
-<span class="fg">🇧🇬</span><span class="nk">bzm</span><span class="cy">保加利亚</span></div><div class="pl foreign"><span class="pos">3</span>
-<span class="fg">🇮🇱</span><span class="nk">33</span><span class="cy">以色列</span></div><div class="pl foreign"><span class="pos">4</span>
-<span class="fg">🇬🇧</span><span class="nk">Ari</span><span class="cy">英国</span></div><div class="pl foreign"><span class="pos">5</span>
-<span class="fg">🇮🇩</span><span class="nk">Whitemon</span><span class="cy">印度尼西亚</span></div>
-<div class="ftr">5 个国籍 · 8–6 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇷🇸 Team Spirit</div>
-<div class="sub">战队精神 · 东欧 Eastern Europe · 欧洲预选</div>
-</div><div class="rec2">3–2</div></div><div class="pl foreign"><span class="pos">1</span>
-<span class="fg">🇺🇦</span><span class="nk">Yatoro</span><span class="cy">乌克兰</span></div><div class="pl foreign"><span class="pos">2</span>
-<span class="fg">🇷🇺</span><span class="nk">Larl</span><span class="cy">俄罗斯</span></div><div class="pl foreign"><span class="pos">3</span>
-<span class="fg">🇷🇺</span><span class="nk">Collapse</span><span class="cy">俄罗斯</span></div><div class="pl foreign"><span class="pos">4</span>
-<span class="fg">🇷🇺</span><span class="nk">not me</span><span class="cy">俄罗斯</span></div><div class="pl foreign"><span class="pos">5</span>
-<span class="fg">🇷🇺</span><span class="nk">rue</span><span class="cy">俄罗斯</span></div>
-<div class="ftr">2 个国籍 · 6–5 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇨🇳 LGD Gaming</div>
-<div class="sub">LGD · 南美 South America · 南美预选 · 原名 前 HEROIC 阵容</div>
-</div><div class="rec2">3–2</div></div><div class="pl foreign"><span class="pos">1</span>
-<span class="fg">🇳🇮</span><span class="nk">Yuma</span><span class="cy">尼加拉瓜</span></div><div class="pl foreign"><span class="pos">2</span>
-<span class="fg">🇫🇮</span><span class="nk">Topson</span><span class="cy">芬兰</span></div><div class="pl foreign"><span class="pos">3</span>
-<span class="fg">🇧🇴</span><span class="nk">Wisper</span><span class="cy">玻利维亚</span></div><div class="pl foreign"><span class="pos">4</span>
-<span class="fg">🇧🇷</span><span class="nk">Thiolicor</span><span class="cy">巴西</span></div><div class="pl foreign"><span class="pos">5</span>
-<span class="fg">🇧🇷</span><span class="nk">KJ</span><span class="cy">巴西</span></div>
-<div class="ftr">4 个国籍 · 7–6 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇸🇦 Team Falcons</div>
-<div class="sub">猎鹰 · 中东 MENA · 直邀</div>
-</div><div class="rec2">3–2</div></div><div class="pl foreign"><span class="pos">1</span>
-<span class="fg">🇸🇰</span><span class="nk">skiter</span><span class="cy">斯洛伐克</span></div><div class="pl foreign"><span class="pos">2</span>
-<span class="fg">🇷🇺</span><span class="nk">Malr1ne</span><span class="cy">俄罗斯</span></div><div class="pl foreign"><span class="pos">3</span>
-<span class="fg">🇯🇴</span><span class="nk">ATF</span><span class="cy">约旦</span></div><div class="pl foreign"><span class="pos">4</span>
-<span class="fg">🇩🇰</span><span class="nk">Cr1t-</span><span class="cy">丹麦</span></div><div class="pl foreign"><span class="pos">5</span>
-<span class="fg">🇺🇸</span><span class="nk">Sneyking</span><span class="cy">美国</span></div>
-<div class="ftr">5 个国籍 · 8–7 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇨🇳 Team Resilience</div>
-<div class="sub">坚韧 · 中国 China · 中国预选</div>
-</div><div class="rec2">2–3</div></div><div class="pl"><span class="pos">1</span>
-<span class="fg">🇨🇳</span><span class="nk">YSR-04E</span><span class="cy">中国</span></div><div class="pl"><span class="pos">2</span>
-<span class="fg">🇨🇳</span><span class="nk">Echozz</span><span class="cy">中国</span></div><div class="pl"><span class="pos">3</span>
-<span class="fg">🇨🇳</span><span class="nk">niu</span><span class="cy">中国</span></div><div class="pl"><span class="pos">4</span>
-<span class="fg">🇨🇳</span><span class="nk">planet</span><span class="cy">中国</span></div><div class="pl"><span class="pos">5</span>
-<span class="fg">🇨🇳</span><span class="nk">zzq</span><span class="cy">中国</span></div>
-<div class="ftr">1 个国籍 · 7–6 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇷🇺 Team Yandex</div>
-<div class="sub">Yandex · 东欧 Eastern Europe · 直邀</div>
-</div><div class="rec2">2–3</div></div><div class="pl foreign"><span class="pos">1</span>
-<span class="fg">🇰🇿</span><span class="nk">watson</span><span class="cy">哈萨克斯坦</span></div><div class="pl"><span class="pos">2</span>
-<span class="fg">🇷🇺</span><span class="nk">CHIRA_JUNIOR</span><span class="cy">俄罗斯</span></div><div class="pl"><span class="pos">3</span>
-<span class="fg">🇷🇺</span><span class="nk">DM</span><span class="cy">俄罗斯</span></div><div class="pl foreign"><span class="pos">4</span>
-<span class="fg">🇲🇰</span><span class="nk">Saksa</span><span class="cy">北马其顿</span></div><div class="pl foreign"><span class="pos">5</span>
-<span class="fg">🇰🇿</span><span class="nk">Malady</span><span class="cy">哈萨克斯坦</span></div>
-<div class="ftr">3 个国籍 · 7–7 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇩🇪 GamerLegion</div>
-<div class="sub">GL · 北美 North America · 北美预选</div>
-</div><div class="rec2">2–3</div></div><div class="pl foreign"><span class="pos">1</span>
-<span class="fg">🇲🇾</span><span class="nk">Ghost</span><span class="cy">马来西亚</span></div><div class="pl foreign"><span class="pos">2</span>
-<span class="fg">🇺🇸</span><span class="nk">RCY</span><span class="cy">美国</span></div><div class="pl foreign"><span class="pos">3</span>
-<span class="fg">🇺🇸</span><span class="nk">Fayde</span><span class="cy">美国</span></div><div class="pl foreign"><span class="pos">4</span>
-<span class="fg">🇺🇦</span><span class="nk">Bignum</span><span class="cy">乌克兰</span></div><div class="pl foreign"><span class="pos">5</span>
-<span class="fg">🇺🇸</span><span class="nk">Speeed</span><span class="cy">美国</span></div>
-<div class="ftr">3 个国籍 · 6–6 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇷🇺 BoomBoys</div>
-<div class="sub">繁荣男孩 · 东欧 Eastern Europe · 直邀 · 原名 BetBoom Team</div>
-</div><div class="rec2">2–3</div></div><div class="pl"><span class="pos">1</span>
-<span class="fg">🇷🇺</span><span class="nk">Kiritych~</span><span class="cy">俄罗斯</span></div><div class="pl"><span class="pos">2</span>
-<span class="fg">🇷🇺</span><span class="nk">gpk~</span><span class="cy">俄罗斯</span></div><div class="pl"><span class="pos">3</span>
-<span class="fg">🇷🇺</span><span class="nk">MieRo`</span><span class="cy">俄罗斯</span></div><div class="pl foreign"><span class="pos">4</span>
-<span class="fg">🇲🇩</span><span class="nk">Save-</span><span class="cy">摩尔多瓦</span></div><div class="pl"><span class="pos">5</span>
-<span class="fg">🇷🇺</span><span class="nk">Kataomi</span><span class="cy">俄罗斯</span></div>
-<div class="ftr">2 个国籍 · 5–7 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇨🇳 Vici Gaming</div>
-<div class="sub">VG · 中国 China · 中国预选</div>
-</div><div class="rec2">2–3</div></div><div class="pl"><span class="pos">1</span>
-<span class="fg">🇨🇳</span><span class="nk">shiro</span><span class="cy">中国</span></div><div class="pl"><span class="pos">2</span>
-<span class="fg">🇨🇳</span><span class="nk">Xm</span><span class="cy">中国</span></div><div class="pl"><span class="pos">3</span>
-<span class="fg">🇨🇳</span><span class="nk">Bach</span><span class="cy">中国</span></div><div class="pl"><span class="pos">4</span>
-<span class="fg">🇨🇳</span><span class="nk">XinQ</span><span class="cy">中国</span></div><div class="pl"><span class="pos">5</span>
-<span class="fg">🇨🇳</span><span class="nk">y`</span><span class="cy">中国</span></div>
-<div class="ftr">1 个国籍 · 4–8 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇨🇳 Xtreme Gaming</div>
-<div class="sub">XG · 中国 China · 直邀</div>
-</div><div class="rec2">1–4</div></div><div class="pl"><span class="pos">1</span>
-<span class="fg">🇨🇳</span><span class="nk">Ame</span><span class="cy">中国</span></div><div class="pl foreign"><span class="pos">2</span>
-<span class="fg">🇲🇾</span><span class="nk">NothingToSay</span><span class="cy">马来西亚</span></div><div class="pl"><span class="pos">3</span>
-<span class="fg">🇨🇳</span><span class="nk">Xxs</span><span class="cy">中国</span></div><div class="pl"><span class="pos">4</span>
-<span class="fg">🇨🇳</span><span class="nk">fy</span><span class="cy">中国</span></div><div class="pl foreign"><span class="pos">5</span>
-<span class="fg">🇲🇾</span><span class="nk">xNova</span><span class="cy">马来西亚</span></div>
-<div class="ftr">2 个国籍 · 3–8 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇷🇸 OG</div>
-<div class="sub">OG · 东南亚 Southeast Asia · 东南亚预选</div>
-</div><div class="rec2">1–4</div></div><div class="pl foreign"><span class="pos">1</span>
-<span class="fg">🇵🇭</span><span class="nk">Natsumi</span><span class="cy">菲律宾</span></div><div class="pl foreign"><span class="pos">2</span>
-<span class="fg">🇵🇭</span><span class="nk">Yopaj-</span><span class="cy">菲律宾</span></div><div class="pl foreign"><span class="pos">3</span>
-<span class="fg">🇵🇭</span><span class="nk">Raven</span><span class="cy">菲律宾</span></div><div class="pl foreign"><span class="pos">4</span>
-<span class="fg">🇵🇭</span><span class="nk">TIMS</span><span class="cy">菲律宾</span></div><div class="pl foreign"><span class="pos">5</span>
-<span class="fg">🇵🇭</span><span class="nk">skem</span><span class="cy">菲律宾</span></div>
-<div class="ftr">1 个国籍 · 2–9 小分</div></div>
-<div class="tc"><div class="th"><div>
-<div class="nm">🇷🇺 HULIGANI</div>
-<div class="sub">流氓 · 东欧 Eastern Europe · 欧洲预选 · 原名 L1ga Team</div>
-</div><div class="rec2">0–4</div></div><div class="pl"><span class="pos">1</span>
-<span class="fg">🇷🇺</span><span class="nk">ssnovv1</span><span class="cy">俄罗斯</span></div><div class="pl foreign"><span class="pos">2</span>
-<span class="fg">🇰🇿</span><span class="nk">Mirage`</span><span class="cy">哈萨克斯坦</span></div><div class="pl"><span class="pos">3</span>
-<span class="fg">🇷🇺</span><span class="nk">Corrupted</span><span class="cy">俄罗斯</span></div><div class="pl"><span class="pos">4</span>
-<span class="fg">🇷🇺</span><span class="nk">sayuw</span><span class="cy">俄罗斯</span></div><div class="pl foreign"><span class="pos">5</span>
-<span class="fg">🇧🇾</span><span class="nk">RESPECT</span><span class="cy">白俄罗斯</span></div>
-<div class="ftr">3 个国籍 · 2–8 小分</div></div></div>
-</section>
+    .projects {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+      gap: 18px;
+    }
 
-<section id="p3">
-<h2>选手国籍分布 <span class="en">Players by Nationality</span></h2>
-<p class="hint">80 名选手来自 27 个国家/地区。下方数据表列出每国的具体选手。</p>
-<div class="chart"><div class="nrow" title="俄罗斯 Russia · 20 人：Satanic(TEAM VISION)、Noticed(TEAM VISION)、9Class(TEAM VISION)、Dukalis(TEAM VISION)、Nightfall(Aurora Gaming)、Pure(Iron Wing)、Larl(Team Spirit)、Collapse(Team Spirit)、not me(Team Spirit)、rue(Team Spirit)、Malr1ne(Team Falcons)、CHIRA_JUNIOR(Team Yandex)、DM(Team Yandex)、Kiritych~(BoomBoys)、gpk~(BoomBoys)、MieRo`(BoomBoys)、Kataomi(BoomBoys)、ssnovv1(HULIGANI)、Corrupted(HULIGANI)、sayuw(HULIGANI)">
-<span class="fg">🇷🇺</span><span class="nmc">俄罗斯 <em>Russia</em></span>
-<div class="track"><div class="fill" style="width:100.0%"></div></div>
-<span class="val">20</span></div>
-<div class="nrow" title="中国 China · 13 人：YSR-04E(Team Resilience)、Echozz(Team Resilience)、niu(Team Resilience)、planet(Team Resilience)、zzq(Team Resilience)、shiro(Vici Gaming)、Xm(Vici Gaming)、Bach(Vici Gaming)、XinQ(Vici Gaming)、y`(Vici Gaming)、Ame(Xtreme Gaming)、Xxs(Xtreme Gaming)、fy(Xtreme Gaming)">
-<span class="fg">🇨🇳</span><span class="nmc">中国 <em>China</em></span>
-<div class="track"><div class="fill" style="width:65.0%"></div></div>
-<span class="val">13</span></div>
-<div class="nrow" title="乌克兰 Ukraine · 6 人：No[o]ne-(TEAM VISION)、lorenof(Nigma Galaxy)、Mira(Aurora Gaming)、kaori(Aurora Gaming)、Yatoro(Team Spirit)、Bignum(GamerLegion)">
-<span class="fg">🇺🇦</span><span class="nmc">乌克兰 <em>Ukraine</em></span>
-<div class="track"><div class="fill" style="width:30.0%"></div></div>
-<span class="val">6</span></div>
-<div class="nrow" title="菲律宾 Philippines · 5 人：Natsumi(OG)、Yopaj-(OG)、Raven(OG)、TIMS(OG)、skem(OG)">
-<span class="fg">🇵🇭</span><span class="nmc">菲律宾 <em>Philippines</em></span>
-<div class="track"><div class="fill" style="width:25.0%"></div></div>
-<span class="val">5</span></div>
-<div class="nrow" title="马来西亚 Malaysia · 4 人：Ws(Aurora Gaming)、Ghost(GamerLegion)、NothingToSay(Xtreme Gaming)、xNova(Xtreme Gaming)">
-<span class="fg">🇲🇾</span><span class="nmc">马来西亚 <em>Malaysia</em></span>
-<div class="track"><div class="fill" style="width:20.0%"></div></div>
-<span class="val">4</span></div>
-<div class="nrow" title="美国 United States · 4 人：Sneyking(Team Falcons)、RCY(GamerLegion)、Fayde(GamerLegion)、Speeed(GamerLegion)">
-<span class="fg">🇺🇸</span><span class="nmc">美国 <em>United States</em></span>
-<div class="track"><div class="fill" style="width:20.0%"></div></div>
-<span class="val">4</span></div>
-<div class="nrow" title="哈萨克斯坦 Kazakhstan · 3 人：watson(Team Yandex)、Malady(Team Yandex)、Mirage`(HULIGANI)">
-<span class="fg">🇰🇿</span><span class="nmc">哈萨克斯坦 <em>Kazakhstan</em></span>
-<div class="track"><div class="fill" style="width:15.0%"></div></div>
-<span class="val">3</span></div>
-<div class="nrow" title="黎巴嫩 Lebanon · 2 人：OmaR(Nigma Galaxy)、GH(Nigma Galaxy)">
-<span class="fg">🇱🇧</span><span class="nmc">黎巴嫩 <em>Lebanon</em></span>
-<div class="track"><div class="fill" style="width:10.0%"></div></div>
-<span class="val">2</span></div>
-<div class="nrow" title="瑞典 Sweden · 2 人：m1CKe(Team Liquid)、Boxi(Team Liquid)">
-<span class="fg">🇸🇪</span><span class="nmc">瑞典 <em>Sweden</em></span>
-<div class="track"><div class="fill" style="width:10.0%"></div></div>
-<span class="val">2</span></div>
-<div class="nrow" title="丹麦 Denmark · 2 人：Ace(Team Liquid)、Cr1t-(Team Falcons)">
-<span class="fg">🇩🇰</span><span class="nmc">丹麦 <em>Denmark</em></span>
-<div class="track"><div class="fill" style="width:10.0%"></div></div>
-<span class="val">2</span></div>
-<div class="nrow" title="印度尼西亚 Indonesia · 2 人：Mikoto(Aurora Gaming)、Whitemon(Iron Wing)">
-<span class="fg">🇮🇩</span><span class="nmc">印度尼西亚 <em>Indonesia</em></span>
-<div class="track"><div class="fill" style="width:10.0%"></div></div>
-<span class="val">2</span></div>
-<div class="nrow" title="巴西 Brazil · 2 人：Thiolicor(LGD Gaming)、KJ(LGD Gaming)">
-<span class="fg">🇧🇷</span><span class="nmc">巴西 <em>Brazil</em></span>
-<div class="track"><div class="fill" style="width:10.0%"></div></div>
-<span class="val">2</span></div>
-<div class="nrow" title="巴基斯坦 Pakistan · 1 人：SumaiL(Nigma Galaxy)">
-<span class="fg">🇵🇰</span><span class="nmc">巴基斯坦 <em>Pakistan</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div>
-<div class="nrow" title="比利时 Belgium · 1 人：Davai Lama(Nigma Galaxy)">
-<span class="fg">🇧🇪</span><span class="nmc">比利时 <em>Belgium</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div>
-<div class="nrow" title="波兰 Poland · 1 人：Nisha(Team Liquid)">
-<span class="fg">🇵🇱</span><span class="nmc">波兰 <em>Poland</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div>
-<div class="nrow" title="德国 Germany · 1 人：tOfu(Team Liquid)">
-<span class="fg">🇩🇪</span><span class="nmc">德国 <em>Germany</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div>
-<div class="nrow" title="保加利亚 Bulgaria · 1 人：bzm(Iron Wing)">
-<span class="fg">🇧🇬</span><span class="nmc">保加利亚 <em>Bulgaria</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div>
-<div class="nrow" title="以色列 Israel · 1 人：33(Iron Wing)">
-<span class="fg">🇮🇱</span><span class="nmc">以色列 <em>Israel</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div>
-<div class="nrow" title="英国 United Kingdom · 1 人：Ari(Iron Wing)">
-<span class="fg">🇬🇧</span><span class="nmc">英国 <em>United Kingdom</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div>
-<div class="nrow" title="尼加拉瓜 Nicaragua · 1 人：Yuma(LGD Gaming)">
-<span class="fg">🇳🇮</span><span class="nmc">尼加拉瓜 <em>Nicaragua</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div>
-<div class="nrow" title="芬兰 Finland · 1 人：Topson(LGD Gaming)">
-<span class="fg">🇫🇮</span><span class="nmc">芬兰 <em>Finland</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div>
-<div class="nrow" title="玻利维亚 Bolivia · 1 人：Wisper(LGD Gaming)">
-<span class="fg">🇧🇴</span><span class="nmc">玻利维亚 <em>Bolivia</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div>
-<div class="nrow" title="斯洛伐克 Slovakia · 1 人：skiter(Team Falcons)">
-<span class="fg">🇸🇰</span><span class="nmc">斯洛伐克 <em>Slovakia</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div>
-<div class="nrow" title="约旦 Jordan · 1 人：ATF(Team Falcons)">
-<span class="fg">🇯🇴</span><span class="nmc">约旦 <em>Jordan</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div>
-<div class="nrow" title="北马其顿 N. Macedonia · 1 人：Saksa(Team Yandex)">
-<span class="fg">🇲🇰</span><span class="nmc">北马其顿 <em>N. Macedonia</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div>
-<div class="nrow" title="摩尔多瓦 Moldova · 1 人：Save-(BoomBoys)">
-<span class="fg">🇲🇩</span><span class="nmc">摩尔多瓦 <em>Moldova</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div>
-<div class="nrow" title="白俄罗斯 Belarus · 1 人：RESPECT(HULIGANI)">
-<span class="fg">🇧🇾</span><span class="nmc">白俄罗斯 <em>Belarus</em></span>
-<div class="track"><div class="fill" style="width:5.0%"></div></div>
-<span class="val">1</span></div></div>
-<div class="callout">
-<div class="co acc"><div class="n">57</div><div class="t">名选手的国籍与其战队注册地不同——TI 是一项彻底跨国的赛事<br><span class="mut">players carry a nationality different from their org's home country</span></div></div>
-<div class="co"><div class="n">3</div><div class="t">支战队是纯单一国籍阵容<br><span class="mut">teams field a single-nationality roster</span></div></div>
-</div>
-<details open><summary>各国选手名单 · Players by country</summary>
-<div class="card" style="margin-top:8px"><table><thead><tr><th>国家 Country</th><th>选手数</th><th>选手 Players</th></tr></thead>
-<tbody><tr><td style="white-space:nowrap">🇷🇺 俄罗斯 <span class="mut">Russia</span></td>
-<td class="rec">20</td><td class="sec" style="font-size:12.5px">Satanic、Noticed、9Class、Dukalis、Nightfall、Pure、Larl、Collapse、not me、rue、Malr1ne、CHIRA_JUNIOR、DM、Kiritych~、gpk~、MieRo`、Kataomi、ssnovv1、Corrupted、sayuw</td></tr>
-<tr><td style="white-space:nowrap">🇨🇳 中国 <span class="mut">China</span></td>
-<td class="rec">13</td><td class="sec" style="font-size:12.5px">YSR-04E、Echozz、niu、planet、zzq、shiro、Xm、Bach、XinQ、y`、Ame、Xxs、fy</td></tr>
-<tr><td style="white-space:nowrap">🇺🇦 乌克兰 <span class="mut">Ukraine</span></td>
-<td class="rec">6</td><td class="sec" style="font-size:12.5px">No[o]ne-、lorenof、Mira、kaori、Yatoro、Bignum</td></tr>
-<tr><td style="white-space:nowrap">🇵🇭 菲律宾 <span class="mut">Philippines</span></td>
-<td class="rec">5</td><td class="sec" style="font-size:12.5px">Natsumi、Yopaj-、Raven、TIMS、skem</td></tr>
-<tr><td style="white-space:nowrap">🇲🇾 马来西亚 <span class="mut">Malaysia</span></td>
-<td class="rec">4</td><td class="sec" style="font-size:12.5px">Ws、Ghost、NothingToSay、xNova</td></tr>
-<tr><td style="white-space:nowrap">🇺🇸 美国 <span class="mut">United States</span></td>
-<td class="rec">4</td><td class="sec" style="font-size:12.5px">Sneyking、RCY、Fayde、Speeed</td></tr>
-<tr><td style="white-space:nowrap">🇰🇿 哈萨克斯坦 <span class="mut">Kazakhstan</span></td>
-<td class="rec">3</td><td class="sec" style="font-size:12.5px">watson、Malady、Mirage`</td></tr>
-<tr><td style="white-space:nowrap">🇱🇧 黎巴嫩 <span class="mut">Lebanon</span></td>
-<td class="rec">2</td><td class="sec" style="font-size:12.5px">OmaR、GH</td></tr>
-<tr><td style="white-space:nowrap">🇸🇪 瑞典 <span class="mut">Sweden</span></td>
-<td class="rec">2</td><td class="sec" style="font-size:12.5px">m1CKe、Boxi</td></tr>
-<tr><td style="white-space:nowrap">🇩🇰 丹麦 <span class="mut">Denmark</span></td>
-<td class="rec">2</td><td class="sec" style="font-size:12.5px">Ace、Cr1t-</td></tr>
-<tr><td style="white-space:nowrap">🇮🇩 印度尼西亚 <span class="mut">Indonesia</span></td>
-<td class="rec">2</td><td class="sec" style="font-size:12.5px">Mikoto、Whitemon</td></tr>
-<tr><td style="white-space:nowrap">🇧🇷 巴西 <span class="mut">Brazil</span></td>
-<td class="rec">2</td><td class="sec" style="font-size:12.5px">Thiolicor、KJ</td></tr>
-<tr><td style="white-space:nowrap">🇵🇰 巴基斯坦 <span class="mut">Pakistan</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">SumaiL</td></tr>
-<tr><td style="white-space:nowrap">🇧🇪 比利时 <span class="mut">Belgium</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">Davai Lama</td></tr>
-<tr><td style="white-space:nowrap">🇵🇱 波兰 <span class="mut">Poland</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">Nisha</td></tr>
-<tr><td style="white-space:nowrap">🇩🇪 德国 <span class="mut">Germany</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">tOfu</td></tr>
-<tr><td style="white-space:nowrap">🇧🇬 保加利亚 <span class="mut">Bulgaria</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">bzm</td></tr>
-<tr><td style="white-space:nowrap">🇮🇱 以色列 <span class="mut">Israel</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">33</td></tr>
-<tr><td style="white-space:nowrap">🇬🇧 英国 <span class="mut">United Kingdom</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">Ari</td></tr>
-<tr><td style="white-space:nowrap">🇳🇮 尼加拉瓜 <span class="mut">Nicaragua</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">Yuma</td></tr>
-<tr><td style="white-space:nowrap">🇫🇮 芬兰 <span class="mut">Finland</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">Topson</td></tr>
-<tr><td style="white-space:nowrap">🇧🇴 玻利维亚 <span class="mut">Bolivia</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">Wisper</td></tr>
-<tr><td style="white-space:nowrap">🇸🇰 斯洛伐克 <span class="mut">Slovakia</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">skiter</td></tr>
-<tr><td style="white-space:nowrap">🇯🇴 约旦 <span class="mut">Jordan</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">ATF</td></tr>
-<tr><td style="white-space:nowrap">🇲🇰 北马其顿 <span class="mut">N. Macedonia</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">Saksa</td></tr>
-<tr><td style="white-space:nowrap">🇲🇩 摩尔多瓦 <span class="mut">Moldova</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">Save-</td></tr>
-<tr><td style="white-space:nowrap">🇧🇾 白俄罗斯 <span class="mut">Belarus</span></td>
-<td class="rec">1</td><td class="sec" style="font-size:12.5px">RESPECT</td></tr></tbody></table></div></details>
-<h2>战队注册地 vs 选手国籍 <span class="en">Org Home vs Player Nationality</span></h2>
-<p class="hint">同一支队伍的"国籍"有两种含义，下表并列呈现。橙色 = 阵容非单一国籍。</p>
-<div class="card"><table><thead><tr><th>战队 Team</th><th>注册地</th><th>阵容国籍构成 Roster</th></tr></thead>
-<tbody><tr><td><b>TEAM VISION</b><br><span class="mut">视野战队</span></td>
-<td style="white-space:nowrap">🇷🇸 东欧</td>
-<td style="font-size:12.5px;color:var(--s2)">俄罗斯 ×4、乌克兰</td></tr>
-<tr><td><b>Nigma Galaxy</b><br><span class="mut">谜团银河</span></td>
-<td style="white-space:nowrap">🇦🇪 西欧</td>
-<td style="font-size:12.5px;color:var(--s2)">黎巴嫩 ×2、巴基斯坦、乌克兰、比利时</td></tr>
-<tr><td><b>Team Liquid</b><br><span class="mut">液体</span></td>
-<td style="white-space:nowrap">🇳🇱 西欧</td>
-<td style="font-size:12.5px;color:var(--s2)">瑞典 ×2、波兰、丹麦、德国</td></tr>
-<tr><td><b>Aurora Gaming</b><br><span class="mut">极光</span></td>
-<td style="white-space:nowrap">🇷🇸 东欧</td>
-<td style="font-size:12.5px;color:var(--s2)">乌克兰 ×2、俄罗斯、印度尼西亚、马来西亚</td></tr>
-<tr><td><b>Iron Wing</b><br><span class="mut">铁翼</span></td>
-<td style="white-space:nowrap">🇷🇺 欧洲</td>
-<td style="font-size:12.5px;color:var(--s2)">俄罗斯、保加利亚、以色列、英国、印度尼西亚</td></tr>
-<tr><td><b>Team Spirit</b><br><span class="mut">战队精神</span></td>
-<td style="white-space:nowrap">🇷🇸 东欧</td>
-<td style="font-size:12.5px;color:var(--s2)">俄罗斯 ×4、乌克兰</td></tr>
-<tr><td><b>LGD Gaming</b><br><span class="mut">LGD</span></td>
-<td style="white-space:nowrap">🇨🇳 南美</td>
-<td style="font-size:12.5px;color:var(--s2)">巴西 ×2、尼加拉瓜、芬兰、玻利维亚</td></tr>
-<tr><td><b>Team Falcons</b><br><span class="mut">猎鹰</span></td>
-<td style="white-space:nowrap">🇸🇦 中东</td>
-<td style="font-size:12.5px;color:var(--s2)">斯洛伐克、俄罗斯、约旦、丹麦、美国</td></tr>
-<tr><td><b>Team Resilience</b><br><span class="mut">坚韧</span></td>
-<td style="white-space:nowrap">🇨🇳 中国</td>
-<td style="font-size:12.5px">中国 ×5</td></tr>
-<tr><td><b>Team Yandex</b><br><span class="mut">Yandex</span></td>
-<td style="white-space:nowrap">🇷🇺 东欧</td>
-<td style="font-size:12.5px;color:var(--s2)">哈萨克斯坦 ×2、俄罗斯 ×2、北马其顿</td></tr>
-<tr><td><b>GamerLegion</b><br><span class="mut">GL</span></td>
-<td style="white-space:nowrap">🇩🇪 北美</td>
-<td style="font-size:12.5px;color:var(--s2)">美国 ×3、马来西亚、乌克兰</td></tr>
-<tr><td><b>BoomBoys</b><br><span class="mut">繁荣男孩</span></td>
-<td style="white-space:nowrap">🇷🇺 东欧</td>
-<td style="font-size:12.5px;color:var(--s2)">俄罗斯 ×4、摩尔多瓦</td></tr>
-<tr><td><b>Vici Gaming</b><br><span class="mut">VG</span></td>
-<td style="white-space:nowrap">🇨🇳 中国</td>
-<td style="font-size:12.5px">中国 ×5</td></tr>
-<tr><td><b>Xtreme Gaming</b><br><span class="mut">XG</span></td>
-<td style="white-space:nowrap">🇨🇳 中国</td>
-<td style="font-size:12.5px;color:var(--s2)">中国 ×3、马来西亚 ×2</td></tr>
-<tr><td><b>OG</b><br><span class="mut">OG</span></td>
-<td style="white-space:nowrap">🇷🇸 东南亚</td>
-<td style="font-size:12.5px">菲律宾 ×5</td></tr>
-<tr><td><b>HULIGANI</b><br><span class="mut">流氓</span></td>
-<td style="white-space:nowrap">🇷🇺 东欧</td>
-<td style="font-size:12.5px;color:var(--s2)">俄罗斯 ×3、哈萨克斯坦、白俄罗斯</td></tr></tbody></table></div>
-</section>
+    .card {
+      position: relative;
+      display: flex;
+      min-height: 260px;
+      flex-direction: column;
+      padding: 28px;
+      overflow: hidden;
+      color: inherit;
+      text-decoration: none;
+      background: linear-gradient(145deg, rgba(31, 39, 64, 0.94), var(--surface));
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.25);
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
 
-<footer>数据来源：Liquipedia · Esports Charts · Escorenews · Dotesports · Hotspawn · GosuGamers · dota2.com 官方。
-选手国籍经多源交叉核验。队名 BoomBoys / TEAM VISION / Iron Wing / HULIGANI 为 BetBoom / PARIVISION / 1win（前 Tundra）/ L1ga 因中国博彩赞助规定所作的赛事改名。<br>
-Player nationalities cross-verified across multiple sources. Generated 2026-08-20 15:15 (UTC+8). 本页为纯静态页面，无需 JavaScript，可离线查看。</footer>
-</div></body></html>
+    .card::after {
+      position: absolute;
+      right: -70px;
+      bottom: -100px;
+      width: 230px;
+      height: 230px;
+      content: "";
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.38), transparent 68%);
+    }
+
+    .card:hover,
+    .card:focus-visible {
+      transform: translateY(-5px);
+      border-color: rgba(34, 211, 238, 0.5);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.38);
+      outline: none;
+    }
+
+    .status {
+      align-self: flex-start;
+      padding: 7px 11px;
+      color: #baf7ff;
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.22);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 750;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .card h2 {
+      margin: auto 0 10px;
+      font-size: clamp(1.65rem, 4vw, 2.35rem);
+      letter-spacing: -0.035em;
+    }
+
+    .card p {
+      max-width: 34rem;
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .open {
+      position: relative;
+      z-index: 1;
+      margin-top: 22px;
+      color: #d9faff;
+      font-weight: 750;
+    }
+
+    footer {
+      margin-top: 56px;
+      padding-top: 24px;
+      color: #66718d;
+      border-top: 1px solid var(--line);
+      font-size: 0.84rem;
+    }
+
+    @media (max-width: 600px) {
+      main { width: min(100% - 28px, 1080px); padding-top: 56px; }
+      .intro { margin-bottom: 38px; }
+      .card { min-height: 235px; padding: 24px; border-radius: 20px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">LINJAY · Web Portal</p>
+      <h1>Projects,<br>collected.</h1>
+      <p class="intro">独立网页项目的统一入口。这里收录数据看板、工具与实验作品，每个项目使用稳定的专属地址。</p>
+    </header>
+
+    <section class="projects" aria-label="项目列表">
+      <a class="card" href="./ti2026.html">
+        <span class="status">Live · 2026</span>
+        <h2>TI15 实时看板</h2>
+        <p>DOTA2 国际邀请赛 2026 上海赛况、战队、选手与国籍数据。</p>
+        <span class="open">打开看板 →</span>
+      </a>
+    </section>
+
+    <footer>linjay.github.io · Static projects portal</footer>
+  </main>
+</body>
+</html>
